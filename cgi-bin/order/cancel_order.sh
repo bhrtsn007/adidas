@@ -4,19 +4,22 @@ cancel_some_order () {
     echo "<br>"
     echo $order_id
     echo "<br>"
-    order_check=`sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript order_node get_by_id "[<<\"$order_id\">>]." | head -3 | grep -E 'temporary_unfulfillable|created|pending|complete|inventory_awaited'`
+    order_check=`sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript order_node get_by_id "[<<\"$order_id\">>]." | head -3 | grep -E 'temporary_unfulfillable|pending|complete'`
+    execution_id=`sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript order_node get_column_by_id "[<<\"$order_id\">>,'execution_id']." | sed -r 's/([^0-9]*([0-9]*)){1}.*/\2/'`
+    echo "<br>"
+    echo $execution_id
+    echo "<br>"
     if [ ! -n "$order_check" ]
     then
-        echo "Order is not in created,pending, temporary_unfulfillable or complete"
+        echo "Order is not in pending, temporary_unfulfillable or complete"
 	echo "<br>"
         echo "Cancelling order from Core server"
         echo '<pre>'
         sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript order_node update_columns_by_id "[<<\"$order_id\">>,[{'status','cancelled'}]]."
-        
         echo '</pre>'
-        echo "Cancelling Order from platform"
+        echo "Cancelling Order from platform by Sending notification by station_recovery command"
         echo '<pre>'
-        sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript station_recovery send_notification "[{'order_notification',[<<\"$order_id\">>]}]."
+        sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript station_recovery send_notification "[{'order_notification',<<\"$order_id\">>}]."
         #sshpass -p '46VNZk7zrWhm' ssh -o StrictHostKeyChecking=no -t gor@172.19.40.51 "/home/gor/easy_console/update_SR_to_cancel.sh $1 " 
         echo '</pre>'
         echo "New Order status from platform"
@@ -28,7 +31,7 @@ cancel_some_order () {
         sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript order_node get_by_id "[<<\"$order_id\">>]."
         echo '</pre>'
     else
-        echo "Order is in created, pending or temporary_unfulfillable so we cannot cancel it, Please contact GOR for support"
+        echo "Order is in  pending or temporary_unfulfillable so we cannot cancel it, Please contact GOR for support"
     fi
 }
 echo "Content-type: text/html"

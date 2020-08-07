@@ -1,9 +1,16 @@
 #!/bin/bash
 clear_attached_butler () {
-    echo "Clearing attached Butler from Charger_ID: $1"
+    echo "Clearing attached Butler and blocked_by_butler_ids from Charger_ID: $1"
     echo "<br>"
+    echo "<br>"
+    echo "<br>"
+    echo "Clearing attached_butler_id"
     sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript chargerinfo update_columns_by_id "[$1,[{'attached_butler_id','undefined'}]]."
-
+    echo "<br>"
+    echo "<br>"
+    echo "<br>"
+    echo "Clearing blocked_by_butler_ids"
+    sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript chargerinfo update_columns_by_id "[$1,[{'blocked_by_butler_ids',[]}]]."
 }
 echo "Content-type: text/html"
 echo ""
