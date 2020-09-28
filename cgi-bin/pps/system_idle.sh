@@ -41,6 +41,8 @@ system_idle () {
     	sleep 0.1
     	check_audit_task
     	sleep 0.1
+      check_move_task
+      sleep 0.1
     	check_block_storage_node
 
     elif [ "$1" -eq "2" ]; then
@@ -82,6 +84,8 @@ system_idle () {
     	sleep 0.1
     	check_audit_task
     	sleep 0.1
+      check_move_task
+      sleep 0.1
     	check_block_storage_node
     	sleep 0.1
 
@@ -412,7 +416,7 @@ check_inconsistent_storage_locations () {
     echo "Check Inconsistent storage locations"
     echo "<br>"
     echo '<pre>'
-    sudo /opt/butler_server/bin/butler_server rpcterms data_sanity_check_functions get_inconsistent_storage_locations
+    sudo /opt/butler_server/erts-9.3.3.6/bin/escript /usr/lib/cgi-bin/MSU/inconsistent_rack.escript
     echo '</pre>'
     echo "<br>"
     echo "##################################################"
@@ -569,6 +573,36 @@ check_audit_task () {
        echo "<br>"
        echo '<pre>'
        sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript audittaskrec search_by "[[{'status', 'notequal', 'complete'}], 'key']."
+       echo '</pre>'
+       echo "<br>"
+       echo "##################################################"
+       echo "<br>"
+    else 
+        echo "Wrong value of count"
+        echo "<br>"
+        echo "##################################################"
+        echo "<br>"
+    fi
+}
+check_move_task () {
+    echo "<br>"
+    echo "All pending Move Task"
+    echo "<br>"
+    count=`sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript movetaskrec search_by "[[{'status', 'notequal', 'complete'}], 'key']." | grep  -o '"' | wc  -l`
+    if [ "$((count/2))" -ge "30" ]; then
+       echo "Pending Move task are 30+".
+       echo "<br>"
+       echo "Total Count: $((count/2))"
+       echo "<br>"
+       echo "<br>"
+       echo "##################################################"
+       echo "<br>"
+    elif [ "$((count/2))" -lt "30" ]; then
+       echo "<br>"
+       echo "Total Count: $((count/2))"
+       echo "<br>"
+       echo '<pre>'
+       sudo /opt/butler_server/erts-9.3.3.6/bin/escript /home/gor/rpc_call.escript movetaskrec search_by "[[{'status', 'notequal', 'complete'}], 'key']."
        echo '</pre>'
        echo "<br>"
        echo "##################################################"

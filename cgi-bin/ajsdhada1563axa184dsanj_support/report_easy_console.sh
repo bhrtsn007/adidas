@@ -52,6 +52,8 @@ echo '<div class="vertical-menu"></div><a href="/cgi-bin/order/temp_unfulfillabl
 
 echo '<div class="vertical-menu"></div><a href="/cgi-bin/order/specific_order.sh" class="active"><b>Order Details(External Id from Internal ID)</b></a>'
 
+echo '<div class="vertical-menu"></div><a href="/cgi-bin/order/pbt_breached.sh" class="active"><b>All PBT breach order</b></a>'
+
 echo '</body>'
 echo '</html>'
 
